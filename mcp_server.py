@@ -7,6 +7,7 @@ from websockets.exceptions import ConnectionClosed
 import os
 
 HOST = "0.0.0.0"
+MCP_PATH = "/mcp/"
 PORT = int(os.environ.get("PORT", "8765"))
 EXPECTED_TOKEN = os.environ.get("MCP_TOKEN", "mcp_7f3c9a2e8b4d1f6a0c5e9d3b2a8f1c4e7d6b9a3c2f8e1d5a7b0c6e9f3d2a4b8")
 
