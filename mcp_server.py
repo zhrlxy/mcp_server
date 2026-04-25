@@ -67,15 +67,27 @@ async def handle_mcp_message(websocket, raw_text):
         response = make_error("", None, -32700, "Invalid JSON")
         await websocket.send(json.dumps(response, ensure_ascii=False))
         return
+    
+    if msg.get("type") == "hello":
+        response = {
+            "type": "hello",
+            "version": msg.get("version", 3),
+            "transport": "websocket",
+            "features": {
+                "mcp": True
+            }
+        }
+        await websocket.send(json.dumps(response, ensure_ascii=False))
+        logging.info(f"SEND hello response: {response}")
+        return
 
-    session_id = msg.get("session_id", "")
-    msg_type = msg.get("type")
-    payload = msg.get("payload", {})
-
-    if msg_type != "mcp":
-        response = make_error(session_id, None, -32600, "Unsupported message type")
+    if msg.get("type") != "mcp":
+        response = make_error("", None, -32600, "Unsupported message type")
         await websocket.send(json.dumps(response, ensure_ascii=False))
         return
+    
+    session_id = msg.get("session_id", "")
+    payload = msg.get("payload", {})
 
     method = payload.get("method")
     request_id = payload.get("id")
@@ -85,7 +97,7 @@ async def handle_mcp_message(websocket, raw_text):
 
     if method == "initialize":
         result = {
-            "protocolVersion": "2025-03-26",
+            "protocolVersion": "2024-11-05",
             "capabilities": {
                 "tools": {}
             },
@@ -101,8 +113,7 @@ async def handle_mcp_message(websocket, raw_text):
 
     if method == "tools/list":
         result = {
-            "tools": TOOLS,
-            "nextCursor": ""
+            "tools": TOOLS
         }
         response = make_result(session_id, request_id, result)
         await websocket.send(json.dumps(response, ensure_ascii=False))
